@@ -1,0 +1,556 @@
+/* ==========================================================================
+   Smart Oil Tracker - SCADA Design System (CSS)
+   ========================================================================== */
+
+:root {
+  /* Color Palette - Light Mode (Default) */
+  --bg-color: #F4F7FA;
+  --card-bg: #FFFFFF;
+  --text-primary: #1E293B;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --border-color: #E2E8F0;
+  --input-bg: #FFFFFF;
+  
+  --color-primary: #2563EB;
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  
+  --color-needle: #0F172A;
+  --gauge-arc-bg: #E2E8F0;
+  --panel-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --card-glow-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.05);
+  
+  --soft-primary: rgba(37, 99, 235, 0.08);
+  --soft-success: rgba(34, 197, 94, 0.08);
+  --soft-warning: rgba(245, 158, 11, 0.08);
+  --soft-danger: rgba(239, 68, 68, 0.08);
+  
+  color-scheme: light dark;
+}
+
+[data-theme="dark"] {
+  /* Color Palette - Dark Mode */
+  --bg-color: #0F172A;
+  --card-bg: #1E293B;
+  --text-primary: #F8FAFC;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+  --border-color: #334155;
+  --input-bg: #0F172A;
+  
+  --color-needle: #F8FAFC;
+  --gauge-arc-bg: #334155;
+  --panel-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --card-glow-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.15);
+  
+  --soft-primary: rgba(59, 130, 246, 0.15);
+  --soft-success: rgba(16, 185, 129, 0.15);
+  --soft-warning: rgba(245, 158, 11, 0.15);
+  --soft-danger: rgba(239, 68, 68, 0.15);
+}
+
+/* Base Styles */
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  margin: 0;
+  padding: 0;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.app-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+/* Header Styling */
+.dashboard-header {
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 1.5rem;
+  transition: border-color 0.3s ease;
+}
+
+.dashboard-header h1 {
+  font-weight: 700;
+  font-size: 1.75rem;
+  letter-spacing: -0.025em;
+}
+
+.tracking-wider {
+  letter-spacing: 0.08em;
+}
+
+.fs-7 {
+  font-size: 0.85rem;
+}
+
+.fs-8 {
+  font-size: 0.75rem;
+}
+
+.datetime-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem 1rem;
+  border-radius: 30px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  box-shadow: var(--panel-shadow);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Status Badges */
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1px solid transparent;
+}
+
+.badge-status.online {
+  background-color: var(--soft-success);
+  color: var(--color-success);
+  border-color: rgba(34, 197, 94, 0.2);
+}
+
+.badge-status.offline {
+  background-color: var(--soft-danger);
+  color: var(--color-danger);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* Pulse Dot Animation for Badges */
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background-color: currentColor;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+}
+
+.pulse-dot::after {
+  content: '';
+  width: 100%;
+  height: 100%;
+  background-color: currentColor;
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  animation: pulse-animation 1.5s infinite ease-in-out;
+  opacity: 0.6;
+}
+
+@keyframes pulse-animation {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* Theme Toggle Button */
+.btn-theme-toggle {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--panel-shadow);
+  transition: all 0.3s ease;
+}
+
+.btn-theme-toggle:hover {
+  background-color: var(--border-color);
+  transform: scale(1.05);
+}
+
+/* Grid Layout for Statistic Cards */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+/* Cards & Panels Styling */
+.status-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: var(--panel-shadow);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.status-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-glow-shadow);
+}
+
+.card-icon-wrapper {
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.card-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.card-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* Soft background colors for icons */
+.bg-soft-primary { background-color: var(--soft-primary); color: var(--color-primary); }
+.bg-soft-success { background-color: var(--soft-success); color: var(--color-success); }
+.bg-soft-warning { background-color: var(--soft-warning); color: var(--color-warning); }
+.bg-soft-danger { background-color: var(--soft-danger); color: var(--color-danger); }
+
+/* Dashboard Panels */
+.dashboard-panel {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: var(--panel-shadow);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.panel-title {
+  font-weight: 600;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-primary);
+  border-left: 3px solid var(--color-primary);
+  padding-left: 0.5rem;
+}
+
+/* Semicircular Gauge Styling */
+.gauge-container {
+  position: relative;
+  width: 220px;
+  height: 110px; /* Half of width for semicircle */
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.gauge-body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--gauge-arc-bg);
+  border-top-left-radius: 110px;
+  border-top-right-radius: 110px;
+  overflow: hidden;
+}
+
+/* Tricolor Fill Arc */
+.gauge-fill-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, var(--color-success) 0%, var(--color-warning) 50%, var(--color-danger) 100%);
+  border-top-left-radius: 110px;
+  border-top-right-radius: 110px;
+  opacity: 0.85;
+}
+
+.gauge-cover {
+  position: absolute;
+  width: 80%;
+  height: 80%;
+  background: var(--card-bg);
+  border-top-left-radius: 88px;
+  border-top-right-radius: 88px;
+  bottom: 0;
+  left: 10%;
+  z-index: 2;
+  transition: background-color 0.3s ease;
+}
+
+/* Needle and Hub */
+.gauge-needle {
+  position: absolute;
+  bottom: 0;
+  left: calc(50% - 2px);
+  width: 4px;
+  height: 95px;
+  background-color: var(--color-needle);
+  transform-origin: 50% 100%;
+  transform: rotate(-90deg); /* Starts at 0 Kg (left) */
+  transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 10;
+  border-radius: 4px 4px 0 0;
+}
+
+.gauge-container::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: calc(50% - 12px);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--color-needle);
+  z-index: 11;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.gauge-labels {
+  position: absolute;
+  width: 100%;
+  bottom: 2px;
+  left: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  z-index: 5;
+}
+
+.gauge-labels span:nth-child(2) {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 75px;
+}
+
+/* Custom Progress Bar Styling */
+.progress-container-custom {
+  position: relative;
+}
+
+.progress-bar-custom-bg {
+  width: 100%;
+  height: 16px;
+  background-color: var(--gauge-arc-bg);
+  border-radius: 30px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid var(--border-color);
+}
+
+.progress-bar-custom-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(to right, var(--color-primary), var(--color-success));
+  border-radius: 30px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Chart Canvas Wrapper */
+.chart-wrapper {
+  position: relative;
+  width: 100%;
+  height: 280px;
+}
+
+/* Map Styling */
+.map-container {
+  height: 280px;
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--panel-shadow);
+  z-index: 1; /* Keep leaflet under bootstrap modals if any */
+}
+
+/* Log Table Styles */
+.filter-panel {
+  background-color: var(--soft-primary);
+  border: 1px solid rgba(37, 99, 235, 0.1);
+}
+
+.filter-panel label {
+  font-weight: 600;
+}
+
+.filter-panel input {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.filter-panel input:focus {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.15);
+}
+
+.log-table-wrapper {
+  max-height: 265px;
+  overflow-y: auto;
+}
+
+.table {
+  color: var(--text-primary);
+}
+
+.table th {
+  border-bottom: 2px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  padding: 0.75rem;
+}
+
+.table td {
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.85rem;
+  padding: 0.75rem;
+}
+
+/* Custom Scrollbar for elements */
+.log-table-wrapper::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.log-table-wrapper::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+
+.log-table-wrapper::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+.log-table-wrapper::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Loading Overlay Styles */
+#loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--bg-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+#loading-overlay.fade-out {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.spinner-container {
+  text-align: center;
+}
+
+.industrial-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid var(--gauge-arc-bg);
+  border-top: 5px solid var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Print Styling for PDF Exports */
+@media print {
+  body {
+    background-color: white;
+    color: #000;
+    font-size: 10pt;
+  }
+  
+  .app-container {
+    padding: 0;
+    margin: 0;
+    max-width: 100%;
+  }
+
+  .dashboard-header,
+  .stats-row,
+  .col-lg-4,
+  .col-lg-8,
+  .map-container,
+  .filter-panel,
+  .d-flex,
+  #theme-toggle {
+    display: none !important;
+  }
+
+  .col-lg-6 {
+    width: 100% !important;
+    display: block !important;
+  }
+
+  .dashboard-panel {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  .log-table-wrapper {
+    max-height: none !important;
+    overflow-y: visible !important;
+  }
+
+  .table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  .table th, .table td {
+    border: 1px solid #ddd !important;
+    padding: 6px !important;
+  }
+}

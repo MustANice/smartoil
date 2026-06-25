@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <title>Smart Oil Tracker - IoT Industrial Dashboard</title>
+  
+  <!-- Google Fonts: Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <!-- Leaflet.js CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  
+  <!-- Custom Style CSS -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Prevent FOUC (Flash of Un-themed Content) -->
+  <script>
+    {
+      const colorScheme = localStorage.getItem("color-scheme");
+      if (colorScheme) {
+        document.querySelector('meta[name="color-scheme"]').content = colorScheme;
+        document.documentElement.setAttribute('data-theme', colorScheme);
+      }
+    }
+  </script>
+</head>
+<body>
+
+  <!-- Loading Animation Overlay -->
+  <div id="loading-overlay">
+    <div class="spinner-container">
+      <div class="industrial-spinner"></div>
+      <p class="mt-3 text-uppercase tracking-wider">Memuat Dashboard...</p>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <div class="app-container">
+    
+    <!-- Top Header -->
+    <header class="dashboard-header d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div class="header-title">
+        <h1 class="m-0"><i class="fa-solid fa-oil-can text-primary me-2"></i>Smart Oil Tracker</h1>
+        <p class="text-muted m-0 fs-7 text-uppercase tracking-wider">Real-Time Oil Monitoring System (SCADA)</p>
+      </div>
+      
+      <!-- Realtime Clock & Controls -->
+      <div class="d-flex align-items-center gap-3 flex-wrap">
+        <!-- Date Time Display -->
+        <div class="datetime-card d-none d-md-flex align-items-center gap-2">
+          <i class="fa-regular fa-clock text-primary"></i>
+          <span id="current-time">Kamis, 25 Juni 2026 - 10:00:00</span>
+        </div>
+
+        <!-- Connection Badges -->
+        <div class="status-badges d-flex align-items-center gap-2">
+          <span id="socket-badge" class="badge-status offline">
+            <span class="pulse-dot"></span> Socket: Disconnected
+          </span>
+          <span id="mqtt-badge" class="badge-status offline">
+            <span class="pulse-dot"></span> MQTT: Disconnected
+          </span>
+        </div>
+
+        <!-- Theme Toggle Switch -->
+        <button id="theme-toggle" class="btn btn-theme-toggle" title="Ubah Tema">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Grid Layout -->
+    <main class="dashboard-grid mt-4">
+      
+      <!-- Row 1: Statistic Cards -->
+      <section class="stats-row">
+        
+        <!-- Card 1: Device Status -->
+        <div class="status-card glow-card">
+          <div class="card-icon-wrapper bg-soft-primary">
+            <i class="fa-solid fa-microchip"></i>
+          </div>
+          <div class="card-info">
+            <span class="card-label">Status Perangkat</span>
+            <h3 id="stat-device-status" class="card-value text-danger">🔴 OFFLINE</h3>
+          </div>
+        </div>
+
+        <!-- Card 2: Oil Weight -->
+        <div class="status-card glow-card">
+          <div class="card-icon-wrapper bg-soft-success">
+            <i class="fa-solid fa-weight-hanging"></i>
+          </div>
+          <div class="card-info">
+            <span class="card-label">Berat Oli</span>
+            <h3 id="stat-oil-weight" class="card-value text-success">0.00 <span class="fs-6 text-muted">Kg</span></h3>
+          </div>
+        </div>
+
+        <!-- Card 3: GPS Status -->
+        <div class="status-card glow-card">
+          <div class="card-icon-wrapper bg-soft-warning">
+            <i class="fa-solid fa-satellite-dish"></i>
+          </div>
+          <div class="card-info">
+            <span class="card-label">Satelit GPS</span>
+            <h3 id="stat-gps-status" class="card-value text-warning">0 <span class="fs-6 text-muted">Satelit</span></h3>
+          </div>
+        </div>
+
+        <!-- Card 4: Speed -->
+        <div class="status-card glow-card">
+          <div class="card-icon-wrapper bg-soft-danger">
+            <i class="fa-solid fa-gauge-high"></i>
+          </div>
+          <div class="card-info">
+            <span class="card-label">Kecepatan</span>
+            <h3 id="stat-speed" class="card-value text-danger">0.00 <span class="fs-6 text-muted">km/h</span></h3>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Row 2: Gauge Meter & Capacity and Real-Time Chart -->
+      <section class="row mt-4 g-4">
+        
+        <!-- Left Side: Semicircle Gauge & Progress (Col 4) -->
+        <div class="col-lg-4 d-flex flex-column gap-4">
+          
+          <!-- Gauge Card -->
+          <div class="dashboard-panel text-center">
+            <h5 class="panel-title mb-4"><i class="fa-solid fa-chart-pie me-2 text-primary"></i>Gauge Volume Oli</h5>
+            
+            <div class="gauge-container mx-auto">
+              <div class="gauge-body">
+                <div class="gauge-fill-bg"></div>
+                <div id="gauge-fill" class="gauge-fill"></div>
+                <div class="gauge-cover"></div>
+              </div>
+              <div id="gauge-needle" class="gauge-needle"></div>
+              <div class="gauge-labels">
+                <span>0 Kg</span>
+                <span>5 Kg</span>
+                <span>10 Kg</span>
+              </div>
+            </div>
+            
+            <div class="mt-3">
+              <h2 id="gauge-display-val" class="m-0 fw-bold">0.00 Kg</h2>
+              <span class="text-muted fs-7 text-uppercase tracking-wider">Kapasitas Maksimal: 10 Kg</span>
+            </div>
+          </div>
+
+          <!-- Progress Bar Card -->
+          <div class="dashboard-panel">
+            <h5 class="panel-title mb-3"><i class="fa-solid fa-battery-half me-2 text-primary"></i>Persentase Kapasitas</h5>
+            
+            <div class="progress-container-custom">
+              <div class="progress-bar-custom-bg">
+                <div id="progress-bar-fill" class="progress-bar-custom-fill" style="width: 0%"></div>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                <span class="text-muted fs-7">Kapasitas Tangki</span>
+                <span id="progress-percentage" class="fw-bold fs-5 text-primary">0%</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Side: Real-Time Chart (Col 8) -->
+        <div class="col-lg-8">
+          <div class="dashboard-panel h-100">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h5 class="panel-title m-0"><i class="fa-solid fa-chart-line me-2 text-primary"></i>Grafik Real-Time Berat Oli</h5>
+              <span class="badge bg-soft-primary px-3 py-2 text-uppercase text-primary tracking-wider fs-8">Update per detik</span>
+            </div>
+            <div class="chart-wrapper">
+              <canvas id="realtimeChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Row 3: Live Map & Live Logs Grid -->
+      <section class="row mt-4 g-4">
+        
+        <!-- Live Map (Col 6) -->
+        <div class="col-lg-6">
+          <div class="dashboard-panel h-100">
+            <h5 class="panel-title mb-3"><i class="fa-solid fa-map-location-dot me-2 text-primary"></i>Pelacakan GPS Real-Time</h5>
+            <div id="map" class="map-container"></div>
+            <div class="d-flex gap-4 mt-2 justify-content-center flex-wrap fs-8 text-muted">
+              <span><i class="fa-solid fa-location-crosshairs text-primary me-1"></i>Lat: <strong id="map-lat">-</strong></span>
+              <span><i class="fa-solid fa-location-crosshairs text-primary me-1"></i>Lng: <strong id="map-lng">-</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- History Table & Filter Panel (Col 6) -->
+        <div class="col-lg-6">
+          <div class="dashboard-panel h-100 d-flex flex-column">
+            
+            <h5 class="panel-title mb-3"><i class="fa-solid fa-database me-2 text-primary"></i>Riwayat Telemetri & Kontrol</h5>
+            
+            <!-- Filters -->
+            <div class="filter-panel mb-3 p-3 rounded">
+              <form id="filter-form" class="row g-2">
+                <div class="col-sm-4">
+                  <label class="fs-8 text-uppercase tracking-wider text-muted fw-500 mb-1">Mulai Tanggal</label>
+                  <input type="date" id="filter-start" class="form-control form-control-sm">
+                </div>
+                <div class="col-sm-4">
+                  <label class="fs-8 text-uppercase tracking-wider text-muted fw-500 mb-1">Sampai Tanggal</label>
+                  <input type="date" id="filter-end" class="form-control form-control-sm">
+                </div>
+                <div class="col-sm-4">
+                  <label class="fs-8 text-uppercase tracking-wider text-muted fw-500 mb-1">Cari Status/Berat</label>
+                  <div class="input-group input-group-sm">
+                    <input type="text" id="filter-search" class="form-control" placeholder="Cari...">
+                    <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-magnifying-glass"></i></button>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <!-- Export Buttons -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <span class="fs-7 text-muted">Data terbaru berada di baris teratas</span>
+              <div class="d-flex gap-2">
+                <button id="btn-export-excel" class="btn btn-outline-success btn-xs px-2 py-1 fs-8">
+                  <i class="fa-solid fa-file-excel me-1"></i>Excel
+                </button>
+                <button id="btn-export-pdf" class="btn btn-outline-danger btn-xs px-2 py-1 fs-8">
+                  <i class="fa-solid fa-file-pdf me-1"></i>PDF / Cetak
+                </button>
+              </div>
+            </div>
+
+            <!-- Table -->
+            <div class="table-responsive flex-grow-1 log-table-wrapper">
+              <table class="table table-hover align-middle">
+                <thead>
+                  <tr>
+                    <th>No</th>
+                    <th>Waktu</th>
+                    <th>Berat (Kg)</th>
+                    <th>Koordinat</th>
+                    <th>Kec.</th>
+                    <th>Sat.</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="log-table-body">
+                  <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">Menunggu data sensor...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center mt-5 py-4 border-top border-soft">
+      <p class="m-0 text-muted fs-8">&copy; 2026 Smart Oil Tracker. Dirancang untuk Pemantauan IoT Industri.</p>
+    </footer>
+
+  </div>
+
+  <!-- Notification Toast Container -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <!-- Dyn Toast Template -->
+  </div>
+
+  <!-- Socket.IO client library -->
+  <script src="/socket.io/socket.io.js"></script>
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Leaflet.js -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <!-- Custom Logic JS -->
+  <script src="app.js"></script>
+
+</body>
+</html>
