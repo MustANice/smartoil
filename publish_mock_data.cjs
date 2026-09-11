@@ -1,9 +1,15 @@
+require('dotenv').config();
 const mqtt = require('mqtt');
 
-const brokerUrl = 'mqtt://127.0.0.1:1883';
-const topic = 'smartoil/sensor';
+const brokerUrl = process.env.MQTT_BROKER_URL || 'mqtt://127.0.0.1:1883';
+const topic = process.env.MQTT_TOPIC || 'smartoil/sensor';
 
-const client = mqtt.connect(brokerUrl);
+const options = {};
+if (process.env.MQTT_USERNAME) options.username = process.env.MQTT_USERNAME;
+if (process.env.MQTT_PASSWORD) options.password = process.env.MQTT_PASSWORD;
+if (brokerUrl.startsWith('mqtts://')) options.rejectUnauthorized = false;
+
+const client = mqtt.connect(brokerUrl, options);
 
 let weight = 5.0;
 let latitude = -6.913421;

@@ -12,12 +12,17 @@ const oilRouter = require('./routes/oil');
 const app = express();
 const server = http.createServer(app);
 
-// Setup Socket.IO dengan CORS
+// Trust reverse proxy (misal: Cloudflare Tunnel)
+app.set('trust proxy', 1);
+
+// Setup Socket.IO dengan CORS & Heartbeat tuning
 const io = new Server(server, {
   cors: {
     origin: '*',
     methods: ['GET', 'POST']
-  }
+  },
+  pingInterval: 10000,
+  pingTimeout: 5000
 });
 
 // Middleware

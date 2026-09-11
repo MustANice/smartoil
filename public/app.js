@@ -374,7 +374,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 9. Socket.IO Connection and Broadcast listeners
   function initSocketIO() {
-    socket = io();
+    socket = io({
+      transports: ['websocket', 'polling']
+    });
 
     socket.on('connect', () => {
       socketBadge.innerHTML = '<span class="pulse-dot"></span> Socket: Connected';
