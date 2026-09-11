@@ -26,11 +26,9 @@
   <!-- Prevent FOUC (Flash of Un-themed Content) -->
   <script>
     {
-      const colorScheme = localStorage.getItem("color-scheme");
-      if (colorScheme) {
-        document.querySelector('meta[name="color-scheme"]').content = colorScheme;
-        document.documentElement.setAttribute('data-theme', colorScheme);
-      }
+      const colorScheme = localStorage.getItem("color-scheme") || "dark";
+      document.querySelector('meta[name="color-scheme"]').content = colorScheme;
+      document.documentElement.setAttribute('data-theme', colorScheme);
     }
   </script>
 </head>

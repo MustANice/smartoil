@@ -51,6 +51,14 @@
   --soft-danger: rgba(239, 68, 68, 0.15);
 }
 
+/* High Contrast Text Adjustments for Dark Mode */
+[data-theme="dark"] .text-muted,
+[data-theme="dark"] .card-subtitle,
+[data-theme="dark"] small,
+[data-theme="dark"] .text-secondary {
+  color: #94a3b8 !important;
+}
+
 /* Base Styles */
 body {
   font-family: 'Poppins', sans-serif;
